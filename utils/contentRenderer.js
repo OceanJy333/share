@@ -4,11 +4,7 @@
  */
 
 const { marked } = require('marked');
-const { JSDOM } = require('jsdom');
 const { CODE_TYPES } = require('./codeDetector');
-
-// 使用 mermaid-render 包来渲染 Mermaid 图表
-const { renderMermaid: mermaidRenderer } = require('mermaid-render');
 
 /**
  * u6e32u67d3HTMLu5185u5bb9
@@ -17,77 +13,23 @@ const { renderMermaid: mermaidRenderer } = require('mermaid-render');
  */
 function renderHtml(content) {
   // u5982u679cu662fu5b8cu6574u7684HTMLu6587u6863uff0cu76f4u63a5u8fd4u56de
-  if (content.trim().startsWith('<!DOCTYPE html>') || 
+  if (content.trim().startsWith('<!DOCTYPE html>') ||
       content.trim().startsWith('<html')) {
     return content;
   }
-  
-  // u5982u679cu4e0du662fu5b8cu6574u7684HTMLu6587u6863uff0cu6dfbu52a0u57fau672cu7684HTMLu7ed3u6784
-  return `
-    <!DOCTYPE html>
-    <html lang="zh-CN">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>HTML-GO 查看器</title>
-      
-      <!-- 网站图标 -->
-      <link rel="icon" href="/icon/web/favicon.ico" sizes="any">
-      <link rel="apple-touch-icon" href="/icon/web/apple-touch-icon.png">
-      <link rel="icon" type="image/png" sizes="192x192" href="/icon/web/icon-192.png">
-      <link rel="icon" type="image/png" sizes="512x512" href="/icon/web/icon-512.png">
-      <meta name="theme-color" content="#6366f1">
-      
-      <!-- iOS 特殊设置 -->
-      <meta name="apple-mobile-web-app-capable" content="yes">
-      <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-      <meta name="apple-mobile-web-app-title" content="HTML-GO">
-      
-      <link rel="stylesheet" href="/css/styles.css">
-      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
-      <style>
-        body {
-          font-family: 'Roboto', sans-serif;
-          line-height: 1.6;
-          color: #333;
-          max-width: 1000px;
-          margin: 0 auto;
-          padding: 20px;
-        }
-        .container {
-          background-color: white;
-          border-radius: 8px;
-          box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-          padding: 30px;
-          margin-top: 20px;
-        }
-        @media (prefers-color-scheme: dark) {
-          body {
-            background-color: #1a1a1a;
-            color: #e6e6e6;
-          }
-          .container {
-            background-color: #2a2a2a;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-          }
-        }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        ${content}
-      </div>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-      <script>
-        document.addEventListener('DOMContentLoaded', () => {
-          document.querySelectorAll('pre code').forEach((block) => {
-            hljs.highlightElement(block);
-          });
-        });
-      </script>
-    </body>
-    </html>
-  `;
+
+  // u4e0du662fu5b8cu6574HTMLu65f6uff0cu6dfbu52a0u57fau7840u7ed3u6784uff0cu4f46u4e0du6dfbu52a0u5bb9u5668u548cu5bbdu5ea6u9650u5236
+  return `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTML-Share</title>
+</head>
+<body>
+${content}
+</body>
+</html>`;
 }
 
 /**
@@ -126,10 +68,11 @@ async function renderMarkdown(content) {
     }
   });
   
-  // 自定义 renderer 来处理代码块
+  // 自定义 renderer 来处理代码块和表格
   const renderer = new marked.Renderer();
   const originalCodeRenderer = renderer.code.bind(renderer);
-  
+  const originalTableRenderer = renderer.table.bind(renderer);
+
   // 重写代码块渲染器
   renderer.code = function(code, language, isEscaped) {
     // 检查是否是 Mermaid 代码
@@ -150,19 +93,25 @@ async function renderMarkdown(content) {
       ];
       return mermaidPatterns.some(pattern => pattern.test(code));
     };
-    
+
     // 如果是 Mermaid 代码或语言标记为 mermaid
     if (language === 'mermaid' || isMermaidCode(code)) {
       return `<div class="mermaid">${code}</div>`;
     }
-    
+
     // 如果是 SVG 代码
     if (language === 'svg') {
       return `<div class="embedded-svg-container">${code}</div>`;
     }
-    
+
     // 否则使用原始渲染器
     return originalCodeRenderer(code, language, isEscaped);
+  };
+
+  // 重写表格渲染器，添加滚动容器
+  renderer.table = function(header, body) {
+    const tableHtml = originalTableRenderer(header, body);
+    return `<div class="table-wrapper">${tableHtml}</div>`;
   };
   
   // 使用自定义渲染器
@@ -326,7 +275,7 @@ async function renderMarkdown(content) {
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>HTML-GO Markdown查看器</title>
+      <title>HTML-Share Markdown查看器</title>
       
       <!-- 网站图标 -->
       <link rel="icon" href="/icon/web/favicon.ico" sizes="any">
@@ -338,7 +287,7 @@ async function renderMarkdown(content) {
       <!-- iOS 特殊设置 -->
       <meta name="apple-mobile-web-app-capable" content="yes">
       <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-      <meta name="apple-mobile-web-app-title" content="HTML-GO">
+      <meta name="apple-mobile-web-app-title" content="HTML-Share">
       
       <link rel="stylesheet" href="/css/markdown-bytedance.css">
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
@@ -392,7 +341,7 @@ function renderSvg(content) {
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>HTML-GO SVG查看器</title>
+      <title>HTML-Share SVG查看器</title>
       
       <!-- 网站图标 -->
       <link rel="icon" href="/icon/web/favicon.ico" sizes="any">
@@ -404,42 +353,55 @@ function renderSvg(content) {
       <!-- iOS 特殊设置 -->
       <meta name="apple-mobile-web-app-capable" content="yes">
       <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-      <meta name="apple-mobile-web-app-title" content="HTML-GO">
+      <meta name="apple-mobile-web-app-title" content="HTML-Share">
       
       <style>
+        /* 莫兰迪蓝色系 */
+        :root {
+          --primary: #8B9DC3;
+          --primary-dark: #6B7FA5;
+          --bg-main: #EEF2F7;
+          --bg-card: #FFFFFF;
+          --text-primary: #4A5568;
+          --border-color: #D8DFE8;
+          --shadow: rgba(107, 127, 165, 0.12);
+        }
+
         body {
-          font-family: 'Roboto', sans-serif;
+          font-family: 'Roboto', 'Noto Sans SC', -apple-system, sans-serif;
           line-height: 1.6;
-          color: #333;
+          color: var(--text-primary);
           margin: 0;
-          padding: 20px;
+          padding: 2rem;
           display: flex;
           justify-content: center;
           align-items: center;
           min-height: 100vh;
-          background-color: #f5f5f7;
+          background-color: var(--bg-main);
         }
+
         .svg-container {
           max-width: 100%;
           overflow: auto;
-          background-color: white;
-          padding: 20px;
-          border-radius: 8px;
-          box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+          background-color: var(--bg-card);
+          padding: 2rem;
+          border-radius: 12px;
+          box-shadow: 0 4px 16px var(--shadow);
+          border: 1px solid var(--border-color);
         }
+
         svg {
           display: block;
           max-width: 100%;
           height: auto;
         }
-        @media (prefers-color-scheme: dark) {
+
+        @media (max-width: 768px) {
           body {
-            background-color: #1a1a1a;
-            color: #e6e6e6;
+            padding: 1rem;
           }
           .svg-container {
-            background-color: #2a2a2a;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            padding: 1.5rem;
           }
         }
       </style>
@@ -524,7 +486,7 @@ async function renderMermaid(content) {
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>HTML-GO Mermaid查看器</title>
+        <title>HTML-Share Mermaid查看器</title>
         
         <!-- 网站图标 -->
         <link rel="icon" href="/icon/web/favicon.ico" sizes="any">
@@ -536,71 +498,109 @@ async function renderMermaid(content) {
         <!-- iOS 特殊设置 -->
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-        <meta name="apple-mobile-web-app-title" content="HTML-GO">
+        <meta name="apple-mobile-web-app-title" content="HTML-Share">
         
         <!-- 引入 Mermaid 库 -->
         <script src="https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js"></script>
         
         <style>
+          /* 莫兰迪蓝色系 */
+          :root {
+            --primary: #8B9DC3;
+            --primary-dark: #6B7FA5;
+            --bg-main: #EEF2F7;
+            --bg-card: #FFFFFF;
+            --bg-code: #F7F9FC;
+            --text-primary: #4A5568;
+            --text-secondary: #718096;
+            --border-color: #D8DFE8;
+            --shadow: rgba(107, 127, 165, 0.12);
+          }
+
           body {
-            font-family: 'Roboto', sans-serif;
+            font-family: 'Roboto', 'Noto Sans SC', -apple-system, sans-serif;
             line-height: 1.6;
-            color: #333;
+            color: var(--text-primary);
             margin: 0;
-            padding: 20px;
+            padding: 2rem;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background-color: #f5f5f7;
+            background-color: var(--bg-main);
           }
+
           .mermaid-container {
             max-width: 100%;
             overflow: auto;
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            background-color: var(--bg-card);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px var(--shadow);
+            border: 1px solid var(--border-color);
           }
+
+          .mermaid-container h2 {
+            color: var(--primary-dark);
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0 0 1.5rem 0;
+          }
+
           .mermaid {
             display: block;
             max-width: 100%;
-            margin: 0 auto;
+            margin: 1.5rem auto;
           }
+
           pre.mermaid-code {
-            background-color: #f8f9fa;
-            border-radius: 4px;
-            padding: 15px;
+            background-color: var(--bg-code);
+            border-radius: 8px;
+            padding: 1.2rem;
             overflow-x: auto;
-            margin: 15px 0;
-            border-left: 4px solid #4a6cf7;
-            display: none; /* 默认隐藏代码 */
+            margin: 1rem 0;
+            border-left: 4px solid var(--primary);
+            border: 1px solid var(--border-color);
+            display: none;
+            font-family: 'SFMono-Regular', Consolas, Menlo, monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            color: var(--text-primary);
           }
+
           .toggle-code-btn {
-            background-color: #4a6cf7;
+            background-color: var(--primary);
             color: white;
             border: none;
-            padding: 8px 16px;
-            border-radius: 4px;
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
             cursor: pointer;
-            margin-bottom: 15px;
+            margin-bottom: 1rem;
             font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(139, 157, 195, 0.15);
           }
+
           .toggle-code-btn:hover {
-            background-color: #3a56d4;
+            background-color: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(107, 127, 165, 0.25);
           }
-          @media (prefers-color-scheme: dark) {
+
+          .toggle-code-btn:active {
+            transform: translateY(0);
+          }
+
+          @media (max-width: 768px) {
             body {
-              background-color: #1a1a1a;
-              color: #e6e6e6;
+              padding: 1rem;
             }
             .mermaid-container {
-              background-color: #2a2a2a;
-              box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+              padding: 1.5rem;
             }
-            pre.mermaid-code {
-              background-color: #333;
-              border-left: 4px solid #4a6cf7;
+            .mermaid-container h2 {
+              font-size: 1.3rem;
             }
           }
         </style>

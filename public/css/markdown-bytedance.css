@@ -1,247 +1,149 @@
 /**
- * u5b57u8282u8df3u52a8u98ceu683cu4e3bu9898 - u53ccu8272u7cfbu4f18u5316u7248
- * u7279u70b9uff1au73b0u4ee3u79d1u6280u611fu3001u7b80u6d01u5927u65b9u3001u89c6u89c9u5c42u6b21u5206u660e
- * u4e3bu8272u8c03uff1au84ddu8272(#1677ff)u3001u9752u7effu8272(#05d4cd)u3001u9ed1u8272(#1d2129)u548cu767du8272
+ * 莫兰迪蓝色系 Markdown 主题
+ * 特点：简洁优雅、柔和配色、舒适阅读
  */
 
 .markdown-body {
-  font-family: 'Roboto', 'Noto Sans SC', sans-serif;
+  font-family: 'Roboto', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   line-height: 1.8;
-  color: #4e5969;
-  max-width: 900px;
+  color: #4A5568;
+  max-width: 1100px; /* 适中宽度，平衡阅读体验和空间利用 */
+  width: 88%; /* 使用百分比宽度，留出适当边距 */
   margin: 0 auto;
-  padding: 20px;
+  padding: 2rem;
+  background: #FFFFFF;
 }
 
-/* u4e00u7ea7u6807u9898u6837u5f0f - u53ccu8272u7cfbu4f18u5316 */
+/* 一级标题样式 */
 .markdown-body h1 {
-  display: table;
-  padding: 0.6em 1.5em;
-  margin: 2em auto 1.5em;
-  color: #1d2129;
-  font-size: 1.6em;
+  padding: 0.8rem 0;
+  margin: 2.5rem 0 1.5rem;
+  color: #6B7FA5;
+  font-size: 1.8em;
   font-weight: 600;
-  text-align: center;
+  text-align: left;
+  border-bottom: 2px solid #B8C5D9;
   position: relative;
-  background: linear-gradient(to right, rgba(22,119,255,0.02), rgba(5,212,205,0.05), rgba(22,119,255,0.02));
-  border-radius: 4px;
-}
-
-.markdown-body h1::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, #1677ff, #05d4cd, #1677ff);
-  border-radius: 3px 3px 0 0;
 }
 
 .markdown-body h1::after {
   content: "";
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, rgba(22,119,255,0), rgba(5,212,205,0.5), rgba(22,119,255,0));
-}
-
-/* u6807u9898u88c5u9970u5143u7d20 */
-.markdown-body h1 span {
-  position: relative;
-  z-index: 1;
-}
-
-.markdown-body h1 span::before {
-  content: "";
-  position: absolute;
   bottom: -2px;
   left: 0;
-  width: 100%;
-  height: 6px;
-  background: linear-gradient(90deg, rgba(22,119,255,0.1), rgba(5,212,205,0.1));
-  z-index: -1;
+  width: 80px;
+  height: 2px;
+  background: #8B9DC3;
 }
 
-/* u4e8cu7ea7u6807u9898u6837u5f0f - u53ccu8272u7cfbu4f18u5316 */
+/* 二级标题样式 */
 .markdown-body h2 {
-  display: table;
-  padding: 0.4em 1.4em;
-  margin: 3em auto 1.5em;
-  color: #fff;
-  background: linear-gradient(135deg, #1677ff, #05d4cd);
-  font-size: 1.3em;
+  padding: 0.6rem 1rem;
+  margin: 2rem 0 1.2rem;
+  color: #FFFFFF;
+  background: #8B9DC3;
+  font-size: 1.4em;
   font-weight: 600;
-  text-align: center;
-  border-radius: 8px 24px 8px 24px;
-  box-shadow: 0 4px 12px rgba(5,212,205,0.15);
-  position: relative;
-  letter-spacing: 0.02em;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(139, 157, 195, 0.15);
 }
 
-.markdown-body h2::before {
-  content: "";
-  position: absolute;
-  top: -2px;
-  left: -2px;
-  right: -2px;
-  bottom: -2px;
-  background: linear-gradient(135deg, #1677ff, #05d4cd);
-  border-radius: 10px 26px 10px 26px;
-  z-index: -1;
-  opacity: 0.3;
-  filter: blur(8px);
-}
-
-.markdown-body h2::after {
-  content: "";
-  position: absolute;
-  bottom: -8px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 0;
-  height: 0;
-  border-left: 8px solid transparent;
-  border-right: 8px solid transparent;
-  border-top: 8px solid #05d4cd;
-}
-
-/* u4e09u7ea7u6807u9898u6837u5f0f - u53ccu8272u7cfbu4f18u5316 */
+/* 三级标题样式 */
 .markdown-body h3 {
-  padding: 0.5em 1em 0.5em 12px;
-  font-size: 1.2em;
-  border-radius: 6px;
-  line-height: 1.6;
-  border-left: 4px solid #1677ff;
-  border-right: 1px solid rgba(22,119,255,0.1);
-  border-bottom: 1px solid rgba(22,119,255,0.1);
-  border-top: 1px solid rgba(22,119,255,0.1);
-  background: rgba(22,119,255,0.05);
-  color: #1677ff;
-  margin: 2em 0 0.75em;
+  padding: 0.5rem 0 0.5rem 1rem;
+  font-size: 1.25em;
+  border-left: 4px solid #87A7BA;
+  background: rgba(135, 167, 186, 0.08);
+  color: #6B7FA5;
+  margin: 1.8rem 0 1rem;
   font-weight: 600;
-  position: relative;
+  border-radius: 0 4px 4px 0;
 }
 
-.markdown-body h3::after {
-  content: "";
-  position: absolute;
-  bottom: -1px;
-  right: -1px;
-  width: 8px;
-  height: 8px;
-  border-radius: 0 0 6px 0;
-  background: #05d4cd;
-  opacity: 0.4;
-}
-
-/* u56dbu7ea7u6807u9898u6837u5f0f - u53ccu8272u7cfbu4f18u5316 */
+/* 四级标题样式 */
 .markdown-body h4 {
-  margin: 2em 0 0.5em;
-  color: #05d4cd;
+  margin: 1.5rem 0 0.8rem;
+  color: #87A7BA;
+  font-size: 1.15em;
+  font-weight: 600;
+  padding: 0.3rem 0;
+  border-bottom: 1px dashed rgba(135, 167, 186, 0.3);
+}
+
+/* 五级、六级标题 */
+.markdown-body h5,
+.markdown-body h6 {
+  margin: 1.2rem 0 0.6rem;
+  color: #718096;
+  font-weight: 600;
+}
+
+.markdown-body h5 {
   font-size: 1.1em;
-  font-weight: 500;
-  border-radius: 6px;
-  padding: 0.3em 0 0.3em 0.6em;
-  border-bottom: 1px dashed rgba(5,212,205,0.3);
-  position: relative;
 }
 
-.markdown-body h4::before {
-  content: "u25c6";
-  color: #05d4cd;
-  font-size: 0.8em;
-  margin-right: 8px;
-  opacity: 0.6;
+.markdown-body h6 {
+  font-size: 1em;
 }
 
-/* u6bb5u843du6837u5f0f */
+/* 段落样式 */
 .markdown-body p {
-  margin: 1.5em 0;
-  letter-spacing: 0;
-  color: #4e5969;
-  text-align: justify;
+  margin: 1.2rem 0;
+  letter-spacing: 0.02em;
+  color: #4A5568;
   line-height: 1.8;
   font-size: 15px;
 }
 
-/* u5f15u7528u6837u5f0f - u53ccu8272u7cfbu4f18u5316 */
+/* 引用样式 */
 .markdown-body blockquote {
   font-style: normal;
-  padding: 1em 1em 1em 2em;
-  border-left: 4px solid #05d4cd;
-  border-radius: 6px;
-  color: #4e5969;
-  background: #f2f3f5;
-  margin: 1.5em 0;
-  border-bottom: 0.2px solid rgba(5,212,205,0.1);
-  border-top: 0.2px solid rgba(5,212,205,0.1);
-  border-right: 0.2px solid rgba(5,212,205,0.1);
+  padding: 1rem 1.2rem;
+  border-left: 4px solid #A4B5C7;
+  border-radius: 4px;
+  color: #4A5568;
+  background: #F7F9FC;
+  margin: 1.5rem 0;
   position: relative;
 }
 
-.markdown-body blockquote::before {
-  content: "u201c";
-  position: absolute;
-  left: 8px;
-  top: 8px;
-  font-size: 2em;
-  color: rgba(5,212,205,0.2);
-  font-family: Georgia, serif;
+.markdown-body blockquote p {
+  margin: 0.5rem 0;
 }
 
-/* u7c97u4f53u6837u5f0f - u53ccu8272u7cfbu4f18u5316 */
+/* 粗体样式 */
 .markdown-body strong {
-  color: #1677ff;
+  color: #6B7FA5;
   font-weight: 600;
-  font-size: inherit;
-  padding: 0 2px;
 }
 
-/* u659cu4f53u6837u5f0f - u53ccu8272u7cfbu4f18u5316 */
+/* 斜体样式 */
 .markdown-body em {
-  color: #05d4cd;
+  color: #87A7BA;
   font-style: italic;
-  font-size: inherit;
 }
 
-/* u5206u5272u7ebfu6837u5f0f - u53ccu8272u7cfbu4f18u5316 */
+/* 分割线样式 */
 .markdown-body hr {
   height: 1px;
   border: none;
-  margin: 2.5em 0;
-  background: linear-gradient(to right, rgba(22,119,255,0), rgba(5,212,205,0.5), rgba(22,119,255,0));
-  position: relative;
+  margin: 2rem 0;
+  background: linear-gradient(to right, rgba(139, 157, 195, 0), rgba(139, 157, 195, 0.3), rgba(139, 157, 195, 0));
 }
 
-.markdown-body hr::before {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 6px;
-  height: 6px;
-  background: #05d4cd;
-  border-radius: 50%;
-  box-shadow: -20px 0 0 rgba(22,119,255,0.5), 20px 0 0 rgba(22,119,255,0.5);
-}
-
-/* u5217u8868u6837u5f0f - u53ccu8272u7cfbu4f18u5316 */
+/* 列表样式 */
 .markdown-body ul {
   list-style: none;
   padding-left: 1.5em;
-  margin: 1.5em 0;
-  color: #4e5969;
+  margin: 1.2rem 0;
+  color: #4A5568;
 }
 
 .markdown-body li {
   position: relative;
-  margin: 0.5em 0;
-  padding-left: 1em;
-  line-height: 1.6;
+  margin: 0.5rem 0;
+  padding-left: 1.2rem;
+  line-height: 1.7;
 }
 
 .markdown-body ul li::before {
@@ -249,125 +151,136 @@
   position: absolute;
   left: 0;
   top: 0.7em;
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
-  background: #1677ff;
+  background: #8B9DC3;
 }
 
-/* u5076u6570u5217u8868u9879u4f7fu7528u9752u7effu8272 */
-.markdown-body ul li:nth-child(even)::before {
-  background: #05d4cd;
-}
-
-/* u6709u5e8fu5217u8868 */
+/* 有序列表 */
 .markdown-body ol {
-  padding-left: 1.5em;
-  margin: 1.5em 0;
-  color: #4e5969;
-  counter-reset: item;
+  padding-left: 1.8em;
+  margin: 1.2rem 0;
+  color: #4A5568;
 }
 
 .markdown-body ol li {
   position: relative;
-  margin: 0.5em 0;
-  padding-left: 0.5em;
-  line-height: 1.6;
+  margin: 0.5rem 0;
+  padding-left: 0.5rem;
+  line-height: 1.7;
 }
 
-/* u4ee3u7801u5757u6837u5f0f - u53ccu8272u7cfbu4f18u5316 */
+/* 代码块样式 */
 .markdown-body pre {
   font-size: 14px;
   overflow-x: auto;
-  border-radius: 8px;
-  padding: 1em;
-  line-height: 1.5;
-  margin: 1.5em 0;
-  border: 1px solid rgba(5,212,205,0.1);
-  background: #f7f8fa;
+  border-radius: 6px;
+  padding: 1.2rem;
+  line-height: 1.6;
+  margin: 1.5rem 0;
+  border: 1px solid #D8DFE8;
+  background: #F7F9FC;
   position: relative;
-}
-
-.markdown-body pre::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 4px;
-  background: linear-gradient(to right, #1677ff, #05d4cd);
-  border-radius: 4px 4px 0 0;
-}
-
-/* u884cu5185u4ee3u7801u6837u5f0f - u53ccu8272u7cfbu4f18u5316 */
-.markdown-body code {
-  font-size: 90%;
-  color: #05d4cd;
-  background: rgba(5,212,205,0.1);
-  padding: 3px 5px;
-  border-radius: 4px;
-  font-family: "SFMono-Regular", Consolas, Menlo, monospace;
 }
 
 .markdown-body pre code {
   background: transparent;
   padding: 0;
-  color: inherit;
+  color: #4A5568;
+  font-size: 13px;
 }
 
-/* u94feu63a5u6837u5f0f - u53ccu8272u7cfbu4f18u5316 */
+/* 行内代码样式 */
+.markdown-body code {
+  font-size: 90%;
+  color: #87A7BA;
+  background: rgba(135, 167, 186, 0.12);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: "SFMono-Regular", Consolas, Menlo, monospace;
+}
+
+/* 链接样式 */
 .markdown-body a {
-  color: #1677ff;
+  color: #8B9DC3;
   text-decoration: none;
-  border-bottom: 1px solid rgba(22,119,255,0.3);
+  border-bottom: 1px solid rgba(139, 157, 195, 0.3);
   transition: all 0.2s ease;
 }
 
 .markdown-body a:hover {
-  color: #05d4cd;
-  border-bottom-color: #05d4cd;
+  color: #6B7FA5;
+  border-bottom-color: #6B7FA5;
 }
 
-/* u56feu7247u6837u5f0f */
+/* 图片样式 */
 .markdown-body img {
   max-width: 100%;
-  border-radius: 8px;
-  margin: 1.5em auto;
+  border-radius: 6px;
+  margin: 1.5rem auto;
   display: block;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  border: 1px solid rgba(5,212,205,0.1);
+  box-shadow: 0 2px 12px rgba(107, 127, 165, 0.1);
+  border: 1px solid #D8DFE8;
 }
 
-/* u8868u683cu6837u5f0f - u53ccu8272u7cfbu4f18u5316 */
+/* 表格滚动容器 */
+.markdown-body .table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+  -webkit-overflow-scrolling: touch; /* iOS 平滑滚动 */
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(107, 127, 165, 0.08);
+  border: 1px solid #D8DFE8;
+}
+
+/* 美化滚动条 */
+.markdown-body .table-wrapper::-webkit-scrollbar {
+  height: 8px;
+}
+
+.markdown-body .table-wrapper::-webkit-scrollbar-track {
+  background: #F7F9FC;
+  border-radius: 4px;
+}
+
+.markdown-body .table-wrapper::-webkit-scrollbar-thumb {
+  background: #8B9DC3;
+  border-radius: 4px;
+}
+
+.markdown-body .table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #6B7FA5;
+}
+
+/* 表格样式 */
 .markdown-body table {
   width: 100%;
   border-collapse: collapse;
-  margin: 1.5em 0;
-  border-radius: 8px;
+  margin: 0; /* 移除外边距，由 wrapper 控制 */
+  border-radius: 6px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  box-shadow: none; /* 移除阴影，由 wrapper 控制 */
+  border: none; /* 移除边框，由 wrapper 控制 */
 }
 
 .markdown-body thead {
-  background: linear-gradient(to right, rgba(22,119,255,0.05), rgba(5,212,205,0.05));
+  background: rgba(139, 157, 195, 0.08);
 }
 
 .markdown-body th {
   padding: 12px 16px;
   text-align: left;
   font-weight: 600;
-  color: #1677ff;
-  border-bottom: 1px solid rgba(5,212,205,0.1);
-}
-
-.markdown-body th:nth-child(even) {
-  color: #05d4cd;
+  color: #6B7FA5;
+  border-bottom: 2px solid #D8DFE8;
 }
 
 .markdown-body td {
   padding: 10px 16px;
-  border-bottom: 1px solid rgba(0,0,0,0.05);
-  color: #4e5969;
+  border-bottom: 1px solid #EEF2F7;
+  color: #4A5568;
 }
 
 .markdown-body tr:last-child td {
@@ -375,141 +288,114 @@
 }
 
 .markdown-body tr:nth-child(even) {
-  background: rgba(247,248,250,0.7);
+  background: #F7F9FC;
 }
 
-/* u952eu76d8u6837u5f0f */
+.markdown-body tr:hover {
+  background: rgba(139, 157, 195, 0.05);
+}
+
+/* 键盘样式 */
 .markdown-body kbd {
-  background: #f7f8fa;
-  border: 1px solid #d9d9d9;
+  background: #F7F9FC;
+  border: 1px solid #D8DFE8;
   border-radius: 4px;
-  box-shadow: 0 2px 0 rgba(0,0,0,0.05);
-  color: #4e5969;
+  box-shadow: 0 2px 0 rgba(107, 127, 165, 0.05);
+  color: #4A5568;
   display: inline-block;
   font-size: 0.85em;
   line-height: 1;
-  padding: 2px 5px;
+  padding: 3px 6px;
   margin: 0 2px;
+  font-family: "SFMono-Regular", Consolas, Menlo, monospace;
 }
 
-/* u6807u8bb0/u9ad8u4eaeu6837u5f0f - u53ccu8272u7cfbu4f18u5316 */
+/* 标记/高亮样式 */
 .markdown-body mark {
-  background: linear-gradient(120deg, rgba(22,119,255,0.1), rgba(5,212,205,0.1));
-  color: #1d2129;
+  background: rgba(184, 197, 217, 0.25);
+  color: #4A5568;
   padding: 0 4px;
   border-radius: 2px;
 }
 
-/* u6309u94aeu6837u5f0f */
-.markdown-body .button {
-  display: inline-block;
-  padding: 8px 16px;
-  background: linear-gradient(135deg, #1677ff, #05d4cd);
-  color: white;
-  border-radius: 4px;
-  font-weight: 500;
-  text-align: center;
-  transition: all 0.3s ease;
-  border: none;
-  box-shadow: 0 2px 6px rgba(5,212,205,0.2);
-  cursor: pointer;
+/* 复选框列表 */
+.markdown-body input[type="checkbox"] {
+  margin-right: 0.5rem;
+  accent-color: #8B9DC3;
 }
 
-.markdown-body .button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(22,119,255,0.3);
+/* 删除线 */
+.markdown-body del {
+  color: #718096;
+  text-decoration-color: rgba(113, 128, 150, 0.5);
 }
 
-/* u5361u7247u6837u5f0f */
-.markdown-body .card {
-  background: white;
-  border-radius: 8px;
-  padding: 16px;
-  margin: 16px 0;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  border-top: 3px solid;
-  border-image: linear-gradient(to right, #1677ff, #05d4cd) 1;
+/* 下划线 */
+.markdown-body u {
+  text-decoration-color: rgba(139, 157, 195, 0.4);
 }
 
-/* u63d0u793au6846u6837u5f0f */
-.markdown-body .tip {
-  background: rgba(5,212,205,0.05);
-  border-left: 4px solid #05d4cd;
-  padding: 12px 16px;
-  margin: 16px 0;
-  border-radius: 0 4px 4px 0;
-  color: #4e5969;
-}
-
-.markdown-body .warning {
-  background: rgba(255,152,0,0.05);
-  border-left: 4px solid #ff9800;
-  padding: 12px 16px;
-  margin: 16px 0;
-  border-radius: 0 4px 4px 0;
-  color: #4e5969;
-}
-
-/* u6697u8272u6a21u5f0fu9002u914d */
-@media (prefers-color-scheme: dark) {
+/* 响应式设计 */
+/* 超大屏幕 (>1920px) */
+@media (min-width: 1920px) {
   .markdown-body {
-    color: #e6e6e6;
-    background-color: #1a1a1a;
+    max-width: 1200px; /* 超大屏幕稍微宽一点 */
   }
-  
+}
+
+/* 大屏幕 (1440px - 1920px) */
+@media (min-width: 1440px) and (max-width: 1919px) {
+  .markdown-body {
+    max-width: 1100px;
+    width: 85%;
+  }
+}
+
+/* 中等屏幕 (1024px - 1440px) */
+@media (min-width: 1024px) and (max-width: 1439px) {
+  .markdown-body {
+    max-width: 1000px;
+    width: 88%;
+  }
+}
+
+/* 小屏幕平板 (768px - 1024px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .markdown-body {
+    width: 95%;
+    padding: 1.8rem 1.5rem;
+  }
+}
+
+/* 移动端 (<768px) */
+@media (max-width: 767px) {
+  .markdown-body {
+    width: 100%;
+    padding: 1.5rem 1rem;
+  }
+
   .markdown-body h1 {
-    color: #f5f5f7;
-    background: linear-gradient(to right, rgba(22,119,255,0.05), rgba(5,212,205,0.08), rgba(22,119,255,0.05));
+    font-size: 1.5em;
   }
-  
-  .markdown-body p {
-    color: #e6e6e6;
+
+  .markdown-body h2 {
+    font-size: 1.3em;
   }
-  
-  .markdown-body blockquote {
-    background: #2a2a2a;
-    color: #e6e6e6;
-    border-left: 4px solid #05d4cd;
+
+  .markdown-body h3 {
+    font-size: 1.2em;
   }
-  
+
   .markdown-body pre {
-    background: #282c34;
-    border-color: rgba(5,212,205,0.2);
+    padding: 1rem;
   }
-  
-  .markdown-body code {
-    background: rgba(5,212,205,0.15);
-  }
-  
+
   .markdown-body table {
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    font-size: 14px;
   }
-  
-  .markdown-body thead {
-    background: linear-gradient(to right, rgba(22,119,255,0.1), rgba(5,212,205,0.1));
-  }
-  
+
+  .markdown-body th,
   .markdown-body td {
-    border-bottom-color: rgba(255,255,255,0.05);
-    color: #e6e6e6;
-  }
-  
-  .markdown-body tr:nth-child(even) {
-    background: rgba(40,40,40,0.7);
-  }
-  
-  .markdown-body .card {
-    background: #2a2a2a;
-  }
-  
-  .markdown-body kbd {
-    background: #2a2a2a;
-    border-color: #444;
-    color: #e6e6e6;
-  }
-  
-  .markdown-body ul li, 
-  .markdown-body ol li {
-    color: #e6e6e6;
+    padding: 8px 12px;
   }
 }

@@ -40,3 +40,7 @@ Thumbs.db
 .vscode/
 *.swp
 *.swo
+
+# 压缩包文件
+*.tar.gz
+*.zip
