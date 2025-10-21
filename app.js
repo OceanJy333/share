@@ -8,6 +8,9 @@ const morgan = require('morgan');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const bcrypt = require('bcrypt');
 const FileStore = require('session-file-store')(session);
 const fs = require('fs');
 const { initDatabase } = require('./models/db');
@@ -38,11 +41,35 @@ const PORT = process.env.NODE_ENV === 'production' ? 8888 : config.port;
 // 将配置添加到应用本地变量中，便于在中间件中访问
 app.locals.config = config;
 
+// 安全中间件设置
+// 1. Helmet - 设置安全HTTP头
+app.use(helmet({
+  contentSecurityPolicy: false, // 我们会在渲染时单独设置CSP
+  crossOriginEmbedderPolicy: false, // 允许加载外部资源（如CDN）
+}));
+
+// 2. 速率限制 - 防止滥用
+const createLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15分钟
+  max: 10, // 每个IP最多10次创建
+  message: '创建分享过于频繁，请稍后再试',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const viewLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1分钟
+  max: 60, // 每个IP最多60次查看
+  message: '访问过于频繁，请稍后再试',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 // 中间件设置
 app.use(morgan(config.logLevel)); // 使用配置文件中的日志级别
 app.use(cors()); // 跨域支持
-app.use(bodyParser.json({ limit: '15mb' })); // JSON 解析，增加限制为15MB
-app.use(bodyParser.urlencoded({ extended: true, limit: '15mb' })); // 增加限制为15MB
+app.use(bodyParser.json({ limit: '1mb' })); // JSON 解析，限制1MB（安全考虑）
+app.use(bodyParser.urlencoded({ extended: true, limit: '1mb' })); // 限制1MB
 app.use(cookieParser()); // 解析 Cookie
 app.use(express.static(path.join(__dirname, 'public'))); // 静态文件
 
@@ -106,7 +133,7 @@ app.get('/login', (req, res) => {
   }
 
   res.render('login', {
-    title: 'HTML-Go | 登录',
+    title: 'HTML-Share | 登录',
     error: null
   });
 });
@@ -116,8 +143,8 @@ app.post('/login', (req, res) => {
 
   console.log('登录尝试:');
   console.log('- 密码:', password);
-  console.log('- 配置密码:', config.authPassword);
-  console.log('- 密码匹配:', password === config.authPassword);
+  console.log('- 用户密码:', config.authPasswordUser);
+  console.log('- 管理员密码:', config.authPasswordAdmin);
 
   // 如果认证功能未启用，直接重定向到首页
   if (!config.authEnabled) {
@@ -125,13 +152,19 @@ app.post('/login', (req, res) => {
     return res.redirect('/');
   }
 
+  // 检查是否是管理员密码
+  const isAdmin = password === config.authPasswordAdmin;
+  const isUser = password === config.authPasswordUser;
+
   // 检查密码是否正确
-  if (password === config.authPassword) {
+  if (isAdmin || isUser) {
     console.log('- 密码正确，设置认证');
+    console.log('- 用户类型:', isAdmin ? '管理员' : '普通用户');
 
     // 同时使用会话和 Cookie 来存储认证状态
     // 1. 设置会话
     req.session.isAuthenticated = true;
+    req.session.isAdmin = isAdmin; // 标记是否是管理员
     console.log('- 设置会话认证标记');
 
     // 2. 设置 Cookie
@@ -141,6 +174,15 @@ app.post('/login', (req, res) => {
       secure: false, // 如果使用 HTTPS，设置为 true
       sameSite: 'lax'
     });
+
+    if (isAdmin) {
+      res.cookie('isAdmin', 'true', {
+        maxAge: 24 * 60 * 60 * 1000, // 24小时
+        httpOnly: true,
+        secure: false,
+        sameSite: 'lax'
+      });
+    }
     console.log('- 设置认证 Cookie');
 
     // 先尝试直接重定向，不等待会话保存
@@ -150,7 +192,7 @@ app.post('/login', (req, res) => {
     console.log('- 密码不匹配，显示错误');
     // 密码错误，显示错误信息
     res.render('login', {
-      title: 'HTML-Go | 登录',
+      title: 'HTML-Share | 登录',
       error: '密码错误，请重试'
     });
   }
@@ -167,12 +209,12 @@ app.get('/logout', (req, res) => {
 // 将 API 路由分为两部分：需要认证的和不需要认证的
 
 // 导入路由处理函数
-const { createPage, getPageById, getRecentPages } = require('./models/pages');
+const { createPage, getPageById, getRecentPages, getAllPages, deletePage, getPageCount, cleanupExpiredPages } = require('./models/pages');
 
 // 创建页面的 API 需要认证
-app.post('/api/pages/create', isAuthenticated, async (req, res) => {
+app.post('/api/pages/create', createLimiter, isAuthenticated, async (req, res) => {
   try {
-    const { htmlContent, isProtected } = req.body;
+    const { htmlContent, isProtected, codeType, expiryDays, viewPassword } = req.body;
 
     if (!htmlContent) {
       return res.status(400).json({
@@ -181,7 +223,33 @@ app.post('/api/pages/create', isAuthenticated, async (req, res) => {
       });
     }
 
-    const result = await createPage(htmlContent, isProtected);
+    // 安全检查：内容大小限制（500KB）
+    const contentSize = Buffer.byteLength(htmlContent, 'utf8');
+    const MAX_CONTENT_SIZE = 500 * 1024; // 500KB
+    if (contentSize > MAX_CONTENT_SIZE) {
+      return res.status(400).json({
+        success: false,
+        error: `内容过大，最大允许 ${MAX_CONTENT_SIZE / 1024}KB，当前 ${Math.round(contentSize / 1024)}KB`
+      });
+    }
+
+    // 验证有效期
+    const validExpiryDays = [0, 1, 3, 5, 7, 14, 30];
+    const expiry = parseInt(expiryDays) || 0;
+    if (!validExpiryDays.includes(expiry)) {
+      return res.status(400).json({
+        success: false,
+        error: '无效的有效期设置'
+      });
+    }
+
+    const result = await createPage(
+      htmlContent,
+      isProtected,
+      codeType || 'html',
+      expiry,
+      viewPassword || ''
+    );
 
     res.json({
       success: true,
@@ -218,19 +286,77 @@ app.get('/validate-password/:id', async (req, res) => {
       return res.json({ valid: false });
     }
 
-    // 检查密码是否正确
-    const isValid = page.is_protected === 1 && password === page.password;
+    // 使用bcrypt验证加密的密码
+    if (page.is_protected === 1) {
+      const isValid = await bcrypt.compare(password, page.password);
+      return res.json({ valid: isValid });
+    }
 
-    return res.json({ valid: isValid });
+    return res.json({ valid: false });
   } catch (error) {
     console.error('密码验证错误:', error);
     return res.status(500).json({ valid: false, error: '服务器错误' });
   }
 });
 
+// 管理后台路由 - 需要登录
+app.get('/admin', isAuthenticated, async (req, res) => {
+  try {
+    const pages = await getAllPages();
+    const pageCount = await getPageCount();
+
+    res.render('admin', {
+      title: 'HTML-Share | 控制台',
+      pages: pages,
+      pageCount: pageCount
+    });
+  } catch (error) {
+    console.error('获取页面列表错误:', error);
+    res.status(500).render('error', {
+      title: '服务器错误',
+      message: '无法加载页面列表'
+    });
+  }
+});
+
+// 删除页面API - 需要登录
+app.delete('/api/pages/:id', isAuthenticated, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // 检查页面是否存在
+    const page = await getPageById(id);
+    if (!page) {
+      return res.status(404).json({
+        success: false,
+        error: '页面不存在'
+      });
+    }
+
+    // 删除页面
+    await deletePage(id);
+
+    res.json({
+      success: true,
+      message: '删除成功'
+    });
+  } catch (error) {
+    console.error('删除页面错误:', error);
+    res.status(500).json({
+      success: false,
+      error: '删除失败'
+    });
+  }
+});
+
 // 首页路由 - 需要登录才能访问
 app.get('/', isAuthenticated, (req, res) => {
-  res.render('index', { title: 'HTML-Go | 分享 HTML 代码的简单方式' });
+  // 检查是否是管理员
+  const isAdmin = req.session?.isAdmin || req.cookies?.isAdmin === 'true';
+  res.render('index', {
+    title: 'HTML-Share | 分享 HTML 代码的简单方式',
+    isAdmin: isAdmin
+  });
 });
 
 // 导入代码类型检测和内容渲染工具
@@ -238,7 +364,7 @@ const { detectCodeType, CODE_TYPES } = require('./utils/codeDetector');
 const { renderContent, escapeHtml } = require('./utils/contentRenderer');
 
 // 查看页面路由 - 无需登录即可访问
-app.get('/view/:id', async (req, res) => {
+app.get('/view/:id', viewLimiter, async (req, res) => {
   try {
     const { getPageById } = require('./models/pages');
     const { id } = req.params;
@@ -251,16 +377,59 @@ app.get('/view/:id', async (req, res) => {
       });
     }
 
-    // 检查是否需要密码验证
+    // 检查页面是否已过期
+    if (page.expires_at && page.expires_at < Date.now()) {
+      return res.status(410).render('error', {
+        title: '页面已过期',
+        message: '该分享链接已过期，无法访问'
+      });
+    }
+
+    // 检查是否需要查看密码
+    if (page.view_password) {
+      const { viewPassword } = req.query;
+
+      if (!viewPassword) {
+        return res.render('view-password', {
+          title: 'HTML-Share | 输入查看密码',
+          id: id,
+          error: null,
+          isViewPassword: true
+        });
+      }
+
+      // 使用bcrypt验证查看密码
+      const isViewPasswordValid = await bcrypt.compare(viewPassword, page.view_password);
+      if (!isViewPasswordValid) {
+        return res.render('view-password', {
+          title: 'HTML-Share | 输入查看密码',
+          id: id,
+          error: '查看密码错误，请重试',
+          isViewPassword: true
+        });
+      }
+    }
+
+    // 检查是否需要密码保护（分享密码）
     if (page.is_protected === 1) {
       const { password } = req.query;
 
-      // 如果没有提供密码或密码不正确，显示密码输入页面
-      if (!password || password !== page.password) {
+      // 如果没有提供密码，显示密码输入页面
+      if (!password) {
         return res.render('password', {
-          title: 'HTML-Go | 密码保护',
+          title: 'HTML-Share | 密码保护',
           id: id,
-          error: password ? '密码错误，请重试' : null
+          error: null
+        });
+      }
+
+      // 使用bcrypt验证密码
+      const isPasswordValid = await bcrypt.compare(password, page.password);
+      if (!isPasswordValid) {
+        return res.render('password', {
+          title: 'HTML-Share | 密码保护',
+          id: id,
+          error: '密码错误，请重试'
         });
       }
     }
@@ -380,7 +549,7 @@ app.get('/view/:id', async (req, res) => {
 </head>`
     );
 
-    // 返回渲染后的内容
+    // 直接返回渲染后的HTML内容（原生体验）
     res.send(contentWithTypeInfo);
   } catch (error) {
     console.error('查看页面错误:', error);
@@ -420,6 +589,20 @@ initDatabase().then(() => {
         console.log(`${Object.keys(middleware.route.methods)} ${middleware.route.path}`);
       }
     });
+
+    // 启动时立即执行一次清理
+    cleanupExpiredPages().catch(err => {
+      console.error('初始清理过期页面失败:', err);
+    });
+
+    // 设置定时清理任务：每小时执行一次
+    setInterval(() => {
+      cleanupExpiredPages().catch(err => {
+        console.error('定时清理过期页面失败:', err);
+      });
+    }, 60 * 60 * 1000); // 1小时 = 60分钟 * 60秒 * 1000毫秒
+
+    console.log('[清理任务] 已启动自动清理过期页面任务，每小时执行一次');
   });
 }).catch(err => {
   console.error('数据库初始化失败:', err);

@@ -1,0 +1,614 @@
+<%- include('partials/header', { title }) %>
+
+<div class="admin-container">
+  <header class="admin-header">
+    <div class="admin-title-bar">
+      <h1 class="admin-title">控制台</h1>
+      <div class="admin-actions">
+        <a href="/" class="admin-btn admin-btn-secondary">
+          <i class="fas fa-home"></i> 返回首页
+        </a>
+        <a href="/logout" class="admin-btn admin-btn-danger">
+          <i class="fas fa-sign-out-alt"></i> 退出
+        </a>
+      </div>
+    </div>
+
+    <div class="admin-stats">
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-file-code"></i>
+        </div>
+        <div class="stat-info">
+          <div class="stat-value"><%= pageCount %></div>
+          <div class="stat-label">托管页面</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="admin-content">
+    <div class="card admin-card">
+      <div class="admin-card-header">
+        <h2 class="admin-card-title">页面列表</h2>
+        <div class="search-box">
+          <input type="text" id="search-input" placeholder="搜索页面ID..." class="search-input">
+          <i class="fas fa-search search-icon"></i>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>类型</th>
+              <th>大小</th>
+              <th>查看密码</th>
+              <th>过期时间</th>
+              <th>创建时间</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="pages-tbody">
+            <% if (pages.length === 0) { %>
+              <tr>
+                <td colspan="7" class="empty-state">
+                  <i class="fas fa-inbox"></i>
+                  <p>暂无托管页面</p>
+                </td>
+              </tr>
+            <% } else { %>
+              <% pages.forEach(page => { %>
+                <tr data-id="<%= page.id %>">
+                  <td class="page-id">
+                    <code><%= page.id %></code>
+                    <button class="copy-btn" onclick="copyToClipboard('<%= page.id %>')" title="复制ID">
+                      <i class="fas fa-copy"></i>
+                    </button>
+                  </td>
+                  <td>
+                    <span class="type-badge type-<%= page.code_type %>">
+                      <%= page.code_type.toUpperCase() %>
+                    </span>
+                  </td>
+                  <td><%= formatSize(page.content_size) %></td>
+                  <td>
+                    <% if (page.view_password) { %>
+                      <span class="password-tag">
+                        <i class="fas fa-key"></i> 已设置
+                      </span>
+                    <% } else { %>
+                      <span class="no-password-tag">无密码</span>
+                    <% } %>
+                  </td>
+                  <td>
+                    <% if (page.expires_at) { %>
+                      <span class="<%= page.expires_at < Date.now() ? 'expired-tag' : 'expires-tag' %>">
+                        <%= formatExpiry(page.expires_at) %>
+                      </span>
+                    <% } else { %>
+                      <span class="permanent-tag">永久</span>
+                    <% } %>
+                  </td>
+                  <td><%= formatDate(page.created_at) %></td>
+                  <td class="actions-cell">
+                    <a href="/view/<%= page.id %>" class="action-icon" target="_blank" title="查看">
+                      <i class="fas fa-eye"></i>
+                    </a>
+                    <button class="action-icon action-delete" onclick="deletePage('<%= page.id %>')" title="删除">
+                      <i class="fas fa-trash-alt"></i>
+                    </button>
+                  </td>
+                </tr>
+              <% }) %>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.admin-container {
+  min-height: 100vh;
+  background: var(--bg-main);
+  padding: 2rem;
+}
+
+.admin-header {
+  margin-bottom: 2rem;
+}
+
+.admin-title-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.admin-title {
+  font-size: 2rem;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.admin-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.admin-btn {
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s;
+}
+
+.admin-btn-secondary {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+.admin-btn-secondary:hover {
+  background: var(--hover-bg);
+  border-color: var(--primary);
+}
+
+.admin-btn-danger {
+  background: #9BA9C4;
+  color: white;
+}
+
+.admin-btn-danger:hover {
+  background: #8693B5;
+  box-shadow: 0 4px 12px rgba(155, 169, 196, 0.3);
+}
+
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 2px 12px var(--shadow);
+  border: 1px solid var(--border-color);
+}
+
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.stat-info {
+  flex: 1;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.admin-content {
+  max-width: 1200px;
+}
+
+.admin-card {
+  background: white;
+}
+
+.admin-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.admin-card-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.search-box {
+  position: relative;
+  width: 300px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.6rem 1rem 0.6rem 2.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-input);
+  font-size: 0.9rem;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.search-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(168, 187, 207, 0.1);
+}
+
+.search-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-table thead {
+  background: var(--bg-input);
+}
+
+.admin-table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.admin-table td {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.9rem;
+  color: var(--text-primary);
+}
+
+.admin-table tbody tr {
+  transition: background 0.2s;
+}
+
+.admin-table tbody tr:hover {
+  background: var(--hover-bg);
+}
+
+.page-id {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.page-id code {
+  font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+  font-size: 0.85rem;
+  background: var(--bg-input);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+}
+
+.copy-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.copy-btn:hover {
+  color: var(--primary);
+  background: var(--hover-bg);
+}
+
+.type-badge {
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.type-html { background: rgba(107, 127, 165, 0.15); color: #6B7FA5; }
+.type-markdown { background: rgba(139, 157, 195, 0.15); color: #8B9DC3; }
+.type-svg { background: rgba(135, 167, 186, 0.15); color: #87A7BA; }
+.type-mermaid { background: rgba(184, 197, 217, 0.15); color: #B8C5D9; }
+
+.expires-tag,
+.expired-tag,
+.permanent-tag {
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.expires-tag {
+  background: rgba(135, 167, 186, 0.15);
+  color: #87A7BA;
+}
+
+.expired-tag {
+  background: rgba(196, 155, 155, 0.15);
+  color: #C49B9B;
+}
+
+.permanent-tag {
+  background: rgba(139, 157, 195, 0.15);
+  color: var(--primary);
+}
+
+.password-tag {
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: rgba(135, 167, 186, 0.15);
+  color: #87A7BA;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.no-password-tag {
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: rgba(113, 128, 150, 0.08);
+  color: var(--text-secondary);
+}
+
+.actions-cell {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.action-icon {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 6px;
+  transition: all 0.2s;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-icon:hover {
+  background: var(--hover-bg);
+  color: var(--primary);
+}
+
+.action-delete:hover {
+  color: #E08B8B;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem !important;
+  color: var(--text-secondary);
+}
+
+.empty-state i {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  display: block;
+  opacity: 0.3;
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 1rem;
+}
+
+@media (max-width: 768px) {
+  .admin-container {
+    padding: 1rem;
+  }
+
+  .admin-title-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .admin-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .search-box {
+    width: 100%;
+  }
+
+  .admin-table {
+    font-size: 0.85rem;
+  }
+
+  .admin-table th,
+  .admin-table td {
+    padding: 0.75rem 0.5rem;
+  }
+}
+</style>
+
+<script>
+// 搜索功能
+document.getElementById('search-input').addEventListener('input', function(e) {
+  const searchText = e.target.value.toLowerCase();
+  const rows = document.querySelectorAll('#pages-tbody tr[data-id]');
+
+  rows.forEach(row => {
+    const id = row.getAttribute('data-id').toLowerCase();
+    if (id.includes(searchText)) {
+      row.style.display = '';
+    } else {
+      row.style.display = 'none';
+    }
+  });
+});
+
+// 复制ID功能
+function copyToClipboard(text) {
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('已复制: ' + text, 'success');
+  }).catch(err => {
+    console.error('复制失败:', err);
+    showToast('复制失败', 'error');
+  });
+}
+
+// 删除页面
+function deletePage(id) {
+  if (!confirm('确定要删除这个页面吗?此操作不可恢复!')) {
+    return;
+  }
+
+  fetch(`/api/pages/${id}`, {
+    method: 'DELETE'
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      showToast('删除成功', 'success');
+      // 移除该行
+      const row = document.querySelector(`tr[data-id="${id}"]`);
+      if (row) {
+        row.remove();
+      }
+      // 刷新页面以更新统计数据
+      setTimeout(() => {
+        location.reload();
+      }, 1000);
+    } else {
+      showToast('删除失败: ' + data.error, 'error');
+    }
+  })
+  .catch(error => {
+    console.error('删除错误:', error);
+    showToast('删除失败', 'error');
+  });
+}
+
+// Toast提示
+function showToast(message, type = 'success') {
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}-toast show`;
+  toast.innerHTML = `
+    <div class="toast-content">
+      <i class="fas fa-${type === 'success' ? 'check' : 'exclamation'}-circle toast-icon"></i>
+      <span class="toast-message">${message}</span>
+    </div>
+  `;
+  document.body.appendChild(toast);
+
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => {
+      document.body.removeChild(toast);
+    }, 300);
+  }, 2000);
+}
+</script>
+
+<%
+function formatSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+function formatDate(timestamp) {
+  const date = new Date(timestamp);
+  const now = new Date();
+  const diff = now - date;
+
+  // 小于1分钟
+  if (diff < 60 * 1000) {
+    return '刚刚';
+  }
+  // 小于1小时
+  if (diff < 60 * 60 * 1000) {
+    return Math.floor(diff / (60 * 1000)) + ' 分钟前';
+  }
+  // 小于1天
+  if (diff < 24 * 60 * 60 * 1000) {
+    return Math.floor(diff / (60 * 60 * 1000)) + ' 小时前';
+  }
+  // 小于7天
+  if (diff < 7 * 24 * 60 * 60 * 1000) {
+    return Math.floor(diff / (24 * 60 * 60 * 1000)) + ' 天前';
+  }
+
+  return date.toLocaleDateString('zh-CN');
+}
+
+function formatExpiry(timestamp) {
+  const expiry = new Date(timestamp);
+  const now = new Date();
+  const diff = timestamp - now.getTime();
+
+  // 已过期
+  if (diff <= 0) {
+    return '已过期';
+  }
+
+  // 小于1小时
+  if (diff < 60 * 60 * 1000) {
+    return Math.floor(diff / (60 * 1000)) + ' 分钟后';
+  }
+  // 小于1天
+  if (diff < 24 * 60 * 60 * 1000) {
+    return Math.floor(diff / (60 * 60 * 1000)) + ' 小时后';
+  }
+  // 小于7天
+  if (diff < 7 * 24 * 60 * 60 * 1000) {
+    return Math.floor(diff / (24 * 60 * 60 * 1000)) + ' 天后';
+  }
+
+  return expiry.toLocaleDateString('zh-CN');
+}
+%>
+
+<%- include('partials/footer') %>

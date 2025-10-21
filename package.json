@@ -18,7 +18,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@mermaid-js/mermaid-cli": "^11.4.2",
+    "bcrypt": "^6.0.0",
     "body-parser": "^1.20.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -26,11 +26,10 @@
     "dotenv": "^16.4.7",
     "ejs": "^3.1.10",
     "express": "^4.21.2",
+    "express-rate-limit": "^8.1.0",
     "express-session": "^1.18.1",
-    "jsdom": "^26.0.0",
+    "helmet": "^8.1.0",
     "marked": "^15.0.7",
-    "mermaid": "^11.6.0",
-    "mermaid-render": "^1.0.9",
     "morgan": "^1.10.0",
     "session-file-store": "^1.5.0",
     "sqlite3": "^5.1.7"

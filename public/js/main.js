@@ -1,4 +1,4 @@
-// HTML-GO 主要JavaScript文件
+// HTML-Share 主要JavaScript文件
 // 处理所有用户交互和功能
 
 // 错误提示功能
@@ -543,18 +543,32 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // 检查是否启用密码保护
         const isProtected = passwordToggle ? passwordToggle.checked : false;
-        
+
+        // 获取有效期和查看密码
+        const expiryDays = document.getElementById('expiry-select') ?
+          parseInt(document.getElementById('expiry-select').value) : 0;
+        const viewPassword = document.getElementById('view-password') ?
+          document.getElementById('view-password').value.trim() : '';
+
         // 检测代码类型
         const codeType = detectCodeType(htmlContent);
         console.log('检测到的代码类型:', codeType);
-        
+        console.log('有效期(天):', expiryDays);
+        console.log('查看密码:', viewPassword ? '已设置' : '未设置');
+
         // 调用 API 生成链接
         const response = await fetch('/api/pages/create', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ htmlContent, isProtected, codeType }),
+          body: JSON.stringify({
+            htmlContent,
+            isProtected,
+            codeType,
+            expiryDays,
+            viewPassword
+          }),
         });
         
         const data = await response.json();

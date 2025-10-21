@@ -26,14 +26,49 @@ function initDatabase() {
           created_at INTEGER NOT NULL,
           password TEXT,
           is_protected INTEGER DEFAULT 0,
-          code_type TEXT DEFAULT 'html'
+          code_type TEXT DEFAULT 'html',
+          expires_at INTEGER,
+          view_password TEXT
         )
       `, (err) => {
         if (err) {
           reject(err);
         } else {
-          console.log('数据库初始化成功');
-          resolve();
+          console.log('数据库表创建/检查完成');
+
+          // 迁移：为现有表添加新字段（如果不存在）
+          db.all("PRAGMA table_info(pages)", (err, columns) => {
+            if (err) {
+              reject(err);
+              return;
+            }
+
+            const hasExpiresAt = columns.some(col => col.name === 'expires_at');
+            const hasViewPassword = columns.some(col => col.name === 'view_password');
+
+            const migrations = [];
+            if (!hasExpiresAt) {
+              migrations.push("ALTER TABLE pages ADD COLUMN expires_at INTEGER");
+            }
+            if (!hasViewPassword) {
+              migrations.push("ALTER TABLE pages ADD COLUMN view_password TEXT");
+            }
+
+            if (migrations.length > 0) {
+              console.log('执行数据库迁移...');
+              Promise.all(migrations.map(sql =>
+                new Promise((res, rej) => {
+                  db.run(sql, err => err ? rej(err) : res());
+                })
+              )).then(() => {
+                console.log('数据库迁移完成');
+                resolve();
+              }).catch(reject);
+            } else {
+              console.log('数据库初始化成功');
+              resolve();
+            }
+          });
         }
       });
     });

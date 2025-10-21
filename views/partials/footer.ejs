@@ -1,12 +1,5 @@
     </div>
-    
-    <!-- 主题切换按钮 -->
-    <div class="theme-toggle">
-      <button id="theme-toggle-btn" class="theme-toggle-btn">
-        <i class="fas fa-moon"></i>
-      </button>
-    </div>
-    
+
     <!-- 错误提示 -->
     <div id="error-toast" class="toast error-toast">
       <div class="toast-content">
@@ -25,15 +18,10 @@
   </div>
   
   <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
-  <!-- 语法高亮 JavaScript -->
+  <!-- 语法高亮 JavaScript - 核心库已包含常用语言支持 -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-  <!-- 额外的语言支持 -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/languages/javascript.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/languages/css.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/languages/html.min.js"></script>
-  <script src="/js/theme.js"></script>
-  <script src="/js/particles-config.js"></script>
+  <script src="/js/particles-config.js?v=<%= Date.now() %>"></script>
   <script src="/js/main.js?v=<%= Date.now() %>"></script>
-  <script src="/js/syntax-highlight.js"></script>
+  <script src="/js/syntax-highlight.js?v=<%= Date.now() %>"></script>
 </body>
 </html>

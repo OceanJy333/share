@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- 莫兰迪蓝色背景 -->
+  <rect width="64" height="64" fill="#8B9DC3" rx="12"/>
+
+  <!-- 白色 "H" 字母 -->
+  <path d="M 18 16 L 18 48 L 24 48 L 24 35 L 40 35 L 40 48 L 46 48 L 46 16 L 40 16 L 40 29 L 24 29 L 24 16 Z" fill="#FFFFFF"/>
+</svg>
