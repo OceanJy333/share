@@ -25,7 +25,7 @@ console.log('环境变量:', {
 });
 
 // 导入认证中间件
-const { isAuthenticated } = require('./middleware/auth');
+const { isAuthenticated, requireAdmin } = require('./middleware/auth');
 
 // 导入配置
 const config = require('./config');
@@ -161,33 +161,46 @@ app.post('/login', (req, res) => {
     console.log('- 密码正确，设置认证');
     console.log('- 用户类型:', isAdmin ? '管理员' : '普通用户');
 
-    // 同时使用会话和 Cookie 来存储认证状态
-    // 1. 设置会话
-    req.session.isAuthenticated = true;
-    req.session.isAdmin = isAdmin; // 标记是否是管理员
-    console.log('- 设置会话认证标记');
+    // 清理旧的 session 数据
+    req.session.regenerate((err) => {
+      if (err) {
+        console.error('- Session 重新生成失败:', err);
+      }
 
-    // 2. 设置 Cookie
-    res.cookie('auth', 'true', {
-      maxAge: 24 * 60 * 60 * 1000, // 24小时
-      httpOnly: true,
-      secure: false, // 如果使用 HTTPS，设置为 true
-      sameSite: 'lax'
-    });
+      // 同时使用会话和 Cookie 来存储认证状态
+      // 1. 设置会话
+      req.session.isAuthenticated = true;
+      req.session.isAdmin = isAdmin; // 标记是否是管理员
+      console.log('- 设置会话认证标记');
 
-    if (isAdmin) {
-      res.cookie('isAdmin', 'true', {
+      // 2. 清除旧的 Cookie,设置新的认证 Cookie
+      res.clearCookie('auth');
+      res.clearCookie('isAdmin');
+
+      res.cookie('auth', 'true', {
         maxAge: 24 * 60 * 60 * 1000, // 24小时
         httpOnly: true,
-        secure: false,
+        secure: false, // 如果使用 HTTPS，设置为 true
         sameSite: 'lax'
       });
-    }
-    console.log('- 设置认证 Cookie');
 
-    // 先尝试直接重定向，不等待会话保存
-    console.log('- 重定向到首页');
-    return res.redirect('/');
+      // 只有管理员才设置 isAdmin cookie
+      if (isAdmin) {
+        res.cookie('isAdmin', 'true', {
+          maxAge: 24 * 60 * 60 * 1000, // 24小时
+          httpOnly: true,
+          secure: false,
+          sameSite: 'lax'
+        });
+        console.log('- 设置管理员 Cookie');
+      } else {
+        console.log('- 普通用户登录，不设置管理员 Cookie');
+      }
+
+      console.log('- 设置认证 Cookie');
+      console.log('- 重定向到首页');
+      return res.redirect('/');
+    });
   } else {
     console.log('- 密码不匹配，显示错误');
     // 密码错误，显示错误信息
@@ -201,8 +214,15 @@ app.post('/login', (req, res) => {
 // 退出登录路由
 app.get('/logout', (req, res) => {
   // 清除会话
-  req.session.destroy();
-  res.redirect('/login');
+  req.session.destroy((err) => {
+    if (err) {
+      console.error('Session 销毁失败:', err);
+    }
+    // 清除所有认证相关的 Cookie
+    res.clearCookie('auth');
+    res.clearCookie('isAdmin');
+    res.redirect('/login');
+  });
 });
 
 // API 路由设置
@@ -299,8 +319,8 @@ app.get('/validate-password/:id', async (req, res) => {
   }
 });
 
-// 管理后台路由 - 需要登录
-app.get('/admin', isAuthenticated, async (req, res) => {
+// 管理后台路由 - 需要登录且必须是管理员
+app.get('/admin', isAuthenticated, requireAdmin, async (req, res) => {
   try {
     const pages = await getAllPages();
     const pageCount = await getPageCount();
@@ -319,8 +339,8 @@ app.get('/admin', isAuthenticated, async (req, res) => {
   }
 });
 
-// 删除页面API - 需要登录
-app.delete('/api/pages/:id', isAuthenticated, async (req, res) => {
+// 删除页面API - 需要登录且必须是管理员
+app.delete('/api/pages/:id', isAuthenticated, requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
 
